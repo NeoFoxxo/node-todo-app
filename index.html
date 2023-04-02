@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <script>
+
+    // make AJAX request to get the items from the server from the /get-data route
+        $.get('/get-data', function(data) {
+
+          // iterate through the items and append them to the list in the HTML
+          for (var i = 0; i < data.length; i++) {
+            $('#list').append('<li>' + data[i].thing_text + '</li>');
+          }
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault(); // prevent the default form submission behavior
+            const form = event.target; // get the form element
+            const formData = new FormData(form); // create a FormData object from the form data
+            const thing_text = formData.get('thing_text'); // get the value of the 'thing_text' field
+            $.post('/submit-form', { thing_text: thing_text }, function(data) {
+                console.log(data); // log the response from the server
+                form.reset(); // reset the form
+                window.location.reload(); // reload the current page after a short delay
+            });
+        }
+        const form = document.querySelector('mainForm');
+        form.addEventListener('submit', handleSubmit);
+        
+    </script>
+    
+    <style>
+    @charset "utf-8";
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            font-size: xx-large;
+            text-align: center;
+           
+        } 
+        h1{
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin: 1rem;
+        } 
+        li{
+            font-size: 1rem;
+        }
+        #add-button {
+            margin-bottom: 2%;
+        }
+    </style>
+
+    <title>Node Todo App</title>
+</head>
+<body>
+    <h1>Add stuff to the list 🔥</h1>
+    <form id="mainForm">
+        <input type="text" id="text" name="text" placeholder="type here"><br><br>
+        <button id="add-button">Add</button>
+    </form>
+    <ul id="list"></ul>
+</body>
+</html>
