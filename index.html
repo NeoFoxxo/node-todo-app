@@ -11,26 +11,33 @@
     // make AJAX request to get the items from the server from the /get-data route
         $.get('/get-data', function(data) {
 
-          // iterate through the items and append them to the list in the HTML
+          // iterate through the items and append them to the list in the HTML and add delete and edit button
           for (var i = 0; i < data.length; i++) {
-            $('#list').append('<li>' + data[i].thing_text + '</li>');
+            $('#list').append('<li>' + data[i].thing_text + `<button class="del-button" value="${data[i].thing_id}">Delete </button>` + '<button class="edit-button">Edit</button>' + '</li>');
           }
         });
 
-        function handleSubmit(event) {
-            event.preventDefault(); // prevent the default form submission behavior
-            const form = event.target; // get the form element
-            const formData = new FormData(form); // create a FormData object from the form data
-            const thing_text = formData.get('thing_text'); // get the value of the 'thing_text' field
-            $.post('/submit-form', { thing_text: thing_text }, function(data) {
-                console.log(data); // log the response from the server
-                form.reset(); // reset the form
-                window.location.reload(); // reload the current page after a short delay
+        // Attach event listener to add button
+        $(document).on('click', '#add-button', function() {
+            var text = $('#text').val();
+
+            // Send POST request to /get-data endpoint
+            $.ajax({
+            url: '/get-data',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({"thing_text": text}),
+            success: function(result) {
+                // Reload the page after successful delete
+                window.location.reload();
+                console.log(result);
+            },
+            error: function() {
+                console.log("failed");
+            }
             });
-        }
-        const form = document.querySelector('mainForm');
-        form.addEventListener('submit', handleSubmit);
-        
+        });
+
     </script>
     
     <style>
@@ -51,17 +58,60 @@
             font-weight: 900;
             margin: 1rem;
         } 
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
         li{
             font-size: 1rem;
         }
         #add-button {
             margin-bottom: 2%;
         }
+        button {
+            justify-content: center;
+        }
+        .del-button {
+            margin-left: 50px;
+        }
+        .edit-button {
+            margin-left: 10px;
+        }
+        .but-text {
+            display: none;
+        }
     </style>
 
     <title>Node Todo App</title>
 </head>
 <body>
+    <script>        
+    
+    $(document).ready(function() {
+        // Attach event listener to delete button
+        $(document).on('click', '.del-button', function() {
+            var thingId = $(this).val();
+
+            // Send POST request to /delete endpoint
+            $.ajax({
+            url: '/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({"thing_id": thingId}),
+            success: function(result) {
+                // Reload the page after successful delete
+                window.location.reload();
+                console.log(result);
+            },
+            error: function() {
+                console.log("failed");
+            }
+            });
+        });
+    });
+    </script>
     <h1>Add stuff to the list 🔥</h1>
     <form id="mainForm">
         <input type="text" id="text" name="text" placeholder="type here"><br><br>

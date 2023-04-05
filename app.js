@@ -4,22 +4,20 @@ const http = require('http');
 const fs = require('fs');
 var url = require('url');
 
-let item;
-
 http.createServer((req, res) => {
-
-
+    
     // take the text from the url
     let adr = url.parse(req.url, true);
 
     // get the current url
-    const urlpathname = adr.pathname;
+    let urlpathname = adr.pathname;
 
     // split the url to only get the text
     let item = adr.query.text;
 
     // get ready for the post to the db
     let post = { thing_text: item };
+
 
     // check if it is undefined or empty before sending it
     if (item !== undefined || item === "") {
@@ -43,7 +41,7 @@ http.createServer((req, res) => {
     } else if (urlpathname === '/get-data') {
         db.query('SELECT * from things', (err, result) => {
         if (err) throw err;
-        const data = result.map(item => ({thing_text: item.thing_text}));
+        const data = result.map(item => ({thing_text: item.thing_text, thing_id: item.thing_id}));
         
         // Send the data back to the client as JSON
         res.writeHead(200, {'Content-Type': 'application/json'});
@@ -51,6 +49,39 @@ http.createServer((req, res) => {
         return res.end();
     });
 
+    // if at the delete url run sql to delete the selected item
+    } else if (urlpathname === '/delete') {
+
+            //receive the post request made to the delete endpoint from the frontend
+            
+            let body = '';
+            req.on('data', chunk => {
+            body += chunk;
+            });
+        
+            req.on('end', () => {
+            const data = JSON.parse(body);
+            const thingId = data.thing_id;
+            console.log('thing_id:', thingId);
+        
+            // delete the item with thingId
+
+            db.query(`DELETE FROM things WHERE thing_id=${thingId}`, (err, result) => {
+            if (err) {
+                console.error(err);
+                result.statusCode = 500;
+                result.end(`Error deleting item ${thingId}`);
+                return;
+            }
+
+            // Send response
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ message: `Successfully deleted item ${thingId}` }));
+    });
+});
+
+  
     // 404 cause yeah
     } else {
         res.writeHead(404, {'Content-Type': 'text/html'});
