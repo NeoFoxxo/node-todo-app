@@ -52,32 +52,32 @@ http.createServer((req, res) => {
     // if at the delete url run sql to delete the selected item
     } else if (urlpathname === '/delete') {
 
-            //receive the post request made to the delete endpoint from the frontend
-            
-            let body = '';
-            req.on('data', chunk => {
-            body += chunk;
-            });
+        //receive the post request made to the delete endpoint from the frontend
         
-            req.on('end', () => {
-            const data = JSON.parse(body);
-            const thingId = data.thing_id;
-            console.log('thing_id:', thingId);
-        
-            // delete the item with thingId
+        let body = '';
+        req.on('data', chunk => {
+        body += chunk;
+        });
+    
+        req.on('end', () => {
+        const data = JSON.parse(body);
+        const thingId = data.thing_id;
+        console.log('thing_id:', thingId);
+    
+        // delete the item with thingId
 
-            db.query(`DELETE FROM things WHERE thing_id=${thingId}`, (err, result) => {
-            if (err) {
-                console.error(err);
-                result.statusCode = 500;
-                result.end(`Error deleting item ${thingId}`);
-                return;
-            }
+        db.query(`DELETE FROM things WHERE thing_id=${thingId}`, (err, result) => {
+        if (err) {
+            console.error(err);
+            result.statusCode = 500;
+            result.end(`Error deleting item ${thingId}`);
+            return;
+        }
 
-            // Send response
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ message: `Successfully deleted item ${thingId}` }));
+        // Send response
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ message: `Successfully deleted item ${thingId}` }));
     });
 });
 

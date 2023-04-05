@@ -17,10 +17,9 @@
           }
         });
 
-        // Attach event listener to add button
+        // this changes the url back to the home page after submission
         $(document).on('click', '#add-button', function() {
             var text = $('#text').val();
-
             // Send POST request to /get-data endpoint
             $.ajax({
             url: '/get-data',
@@ -28,7 +27,7 @@
             contentType: 'application/json',
             data: JSON.stringify({"thing_text": text}),
             success: function(result) {
-                // Reload the page after successful delete
+                // Reload the page after successful add
                 window.location.reload();
                 console.log(result);
             },
@@ -109,6 +108,13 @@
                 console.log("failed");
             }
             });
+        });
+
+
+
+        // add edit textbox when edit button is pressed
+        $(document).on('click', '.edit-button', function() {
+            $('#list').append(`<input type="text" id="text" name="text" placeholder="edit here">`);
         });
     });
     </script>
