@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
+    <!-- it's basically impossible to use external files with vanilla node ok please accept this messy html file -->
+
     <script>
 
     // make AJAX request to get the items from the server from the /get-data route
@@ -13,7 +15,7 @@
 
           // iterate through the items and append them to the list in the HTML and add delete and edit button
           for (var i = 0; i < data.length; i++) {
-            $('#list').append('<li>' + data[i].thing_text + `<button class="del-button" value="${data[i].thing_id}">Delete </button>` + '<button class="edit-button">Edit</button>' + '</li>');
+            $('#list').append('<li>' + data[i].thing_text + `<button class="del-button" value="${data[i].thing_id}">Delete </button>` + '<button class="edit-button">Edit</button>' + `<input size="10" type="text" class="edit-text" name="text" placeholder="edit here">`+ '</li>');
           }
         });
 
@@ -81,6 +83,11 @@
         .but-text {
             display: none;
         }
+        .edit-text {
+            display: none;
+            margin-left: 2%;
+            
+        }
     </style>
 
     <title>Node Todo App</title>
@@ -111,13 +118,67 @@
         });
 
 
-
         // add edit textbox when edit button is pressed
         $(document).on('click', '.edit-button', function() {
-            $('#list').append(`<input type="text" id="text" name="text" placeholder="edit here">`);
+
+            // get the button pressed
+            var $editButton = $(this);
+
+            // get the text item closest to the selected button
+            var $editText = $editButton.closest("li").find('.edit-text');
+
+
+            //remove the edit button and show the edit text box
+            $editButton.remove();
+
+            // add this class to the edit clicked on so we know what one to target for the actual edit
+            $editText.show().addClass('active-text');
+        });
+
+        // this looks for when the enter button is pressed on the edit text box with the active text class
+        $(document).on('keypress', '.active-text', function(event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            
+            // 13 is enter according to stack overflow 😎
+            if(keycode == '13'){
+
+                // get the button pressed
+                var $edtext = $(this);
+
+                // get the text in the textbox
+                let thetext = $edtext.val();
+
+                console.log(thetext);
+
+                // this is used to find the id of the item we are editing
+                // this is stored in the value of the del button so we find the one nearest to the edit button
+                var $id = $edtext.closest("li").find('.del-button').val();
+
+                // Send POST request to /edit endpoint
+                $.ajax({
+                url: '/edit',
+                type: 'POST',
+                contentType: 'application/json',
+
+                // send the id and the new text to the server
+                data: JSON.stringify({"thing_id": $id, "new_text": thetext}),
+                success: function(result) {
+                    // Reload the page after successful delete
+                    window.location.reload();
+                    console.log(result);
+
+                    // remove the class so it doesnt mess with stuff
+                    $edText.removeClass('active-text');
+                },
+                error: function() {
+                    console.log("failed");
+                }
+                });
+            }
         });
     });
     </script>
+
     <h1>Add stuff to the list 🔥</h1>
     <form id="mainForm">
         <input type="text" id="text" name="text" placeholder="type here"><br><br>

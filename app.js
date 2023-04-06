@@ -1,4 +1,4 @@
-//dependancies
+// dependancies
 const mysql = require('mysql');
 const http = require('http');
 const fs = require('fs');
@@ -29,13 +29,13 @@ http.createServer((req, res) => {
 
     // if at root home page load the html
     if (urlpathname === '/'){
+
     // start server and pull the html
     fs.readFile('index.html', function(err, data) {
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.write(data);
-        // console.log("server online at port 3001")
         return res.end();
-      });
+    });
     
     // if at the get data url run a select statement to get all the items and save it as json
     } else if (urlpathname === '/get-data') {
@@ -52,7 +52,7 @@ http.createServer((req, res) => {
     // if at the delete url run sql to delete the selected item
     } else if (urlpathname === '/delete') {
 
-        //receive the post request made to the delete endpoint from the frontend
+        // receive the post request made to the delete endpoint from the frontend
         
         let body = '';
         req.on('data', chunk => {
@@ -81,7 +81,43 @@ http.createServer((req, res) => {
     });
 });
 
-  
+// the epic edit route
+} else if (urlpathname === '/edit') {
+
+    // receive the post request made to the edit endpoint from the front end
+    
+    // do some freaky shit here
+    let body = '';
+    req.on('data', chunk => {
+    body += chunk;
+    });
+
+    // parse the json sent through the post request
+    req.on('end', () => {
+    const data = JSON.parse(body);
+
+    // get the 2 values we need; the ID and the new text
+    const thingId = data.thing_id;
+    const text = data.new_text;
+    console.log('thing_id:', thingId);
+    console.log('new_text:', text);
+    
+    // edit the item with thingId and the new text using sql
+    db.query(`UPDATE things SET thing_text = '${text}' WHERE things.thing_id = ${thingId}`, (err, result) => {
+    if (err) {
+        console.error(err);
+        result.statusCode = 500;
+        result.end(`Error editing item ${thingId}`);
+        return;
+    }
+
+    // Send response
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ message: `Successfully edited item ${thingId}` }));
+    });
+});
+
     // 404 cause yeah
     } else {
         res.writeHead(404, {'Content-Type': 'text/html'});
