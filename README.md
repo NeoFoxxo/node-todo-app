@@ -3,6 +3,6 @@
 
 * ## Todo's:
     - [x] Add delete
-    - [ ] Add edit
+    - [x] Add edit
 
 ![](https://github.com/NeoFoxxo/node-todo-app/blob/master/ss.png)
