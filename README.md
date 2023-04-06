@@ -3,6 +3,7 @@
 This is a simple Node.js application that allows people to create, edit, and delete todo items. It uses MySQL to store the data.
 <br><br>We all start somewhere right?
 
+<b>Timespent:</b> 9 hours 32 mins
 ## Features
 * Add new todo items
 * Edit existing todo items
